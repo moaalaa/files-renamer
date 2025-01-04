@@ -26,7 +26,7 @@ class Home extends Component
     #[Computed]
     public function directories()
     {
-        $directories = File::directories("D:{$this->directorySeparator}Anime{$this->directorySeparator}New{$this->directorySeparator}");
+        $directories = File::directories('YOUR_PATH');
 
         return collect($directories)->map(function ($directory) {
             return [
