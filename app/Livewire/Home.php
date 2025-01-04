@@ -5,11 +5,16 @@ namespace App\Livewire;
 use Illuminate\Support\Facades\File;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
+use Mary\Traits\Toast;
 use Symfony\Component\Finder\SplFileInfo;
 
 class Home extends Component
 {
+    use Toast;
+
     public ?string $openedPath = null;
+    public ?string $directoryName = null;
+    public int $startFrom = 1;
     public string $directorySeparator;
     public array $customOrder = []; // Store custom order
 
@@ -38,7 +43,9 @@ class Home extends Component
         if (!$this->openedPath) return [];
 
         $directory = str_replace('_', $this->directorySeparator, $this->openedPath);
-        $directoryName = str(basename($directory))->title();
+        $this->directoryName = str(basename($directory))->title();
+
+        if (! $this->directoryName) return [];
 
         /** @var SplFileInfo[] */
         $files = File::files($directory);
@@ -70,29 +77,25 @@ class Home extends Component
 
         // Rename files
         return $sortedFiles
-            ->map(function (SplFileInfo $file, $index) use ($directoryName, $sortedFiles) {
-                $fileNumber = str_pad($index + 1, 2, '0', STR_PAD_LEFT);
+            ->map(function (SplFileInfo $file, $index) use ($sortedFiles) {
+                $fileNumber = str_pad($index + $this->startFrom, 2, '0', STR_PAD_LEFT);
                 $isLastFile = $index === count($sortedFiles) - 1;
 
-                $newFileName = $directoryName . ' - ' . $fileNumber;
+                $newFileName = $this->directoryName . ' - ' . $fileNumber;
                 if ($isLastFile) {
                     $newFileName .= ' END';
                 }
-
-                // $newFileName .= '.' . $file->getExtension();
-
-                // Rename the file
-                // $newFilePath = $file->getPath() . DIRECTORY_SEPARATOR . $newFileName;
-                // File::move($file->getPathname(), $newFilePath);
 
                 return [
                     'order' => $index + 1,
                     'original_name' => $file->getFilenameWithoutExtension(),
                     'extension' => $file->getExtension(),
                     'path' => $file->getPathname(),
+                    'directory_path' => dirname($file->getPathname()),
                     'new_name' => $newFileName,
                 ];
-            })->toArray();
+            })
+            ->toArray();
     }
 
     public function reorderFiles($order)
@@ -104,6 +107,48 @@ class Home extends Component
     {
         $this->openedPath = $path;
         $this->customOrder = []; // Reset custom order
+    }
+
+    public function rename()
+    {
+
+        if (! $this->openedPath) {
+            $this->error(
+                title: 'No Directory Opened',
+                position: 'toast-bottom toast-end',
+            );
+
+            return;
+        }
+
+        if (! $this->files) {
+            $this->error(
+                title: 'No Files',
+                position: 'toast-bottom toast-end',
+            );
+
+            return;
+        }
+
+        try {
+            foreach ($this->files as $file) {
+                File::move($file['path'], $file['directory_path'] . DIRECTORY_SEPARATOR . $file['new_name'] . '.' . $file['extension']);
+            }
+
+            $this->success(
+                title: 'Renamed',
+                position: 'toast-bottom toast-end',
+            );
+
+            unset($this->files);
+
+            $this->reset(['startFrom', 'directoryName', 'openedPath']);
+        } catch (\Exception $e) {
+            $this->error(
+                title: 'Something went wrong',
+                position: 'toast-bottom toast-end',
+            );
+        }
     }
 
     public function render()

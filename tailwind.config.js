@@ -16,9 +16,16 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            scrollbar: {
+                thumb: {
+                    rounded: 'sm', // Add rounded corners
+                },
+            },
         },
     },
     plugins: [
-        require("daisyui")
+        require("daisyui"),
+        require('tailwind-scrollbar')({ nocompatible: true }),
+        require('tailwind-scrollbar-hide'),
     ],
 };
