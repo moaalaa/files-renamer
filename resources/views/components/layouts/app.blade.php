@@ -22,14 +22,16 @@
             <label for="main-drawer" class="mr-3 lg:hidden">
                 <x-mary-icon name="o-bars-3" class="cursor-pointer" />
             </label>
+
             {{-- Brand --}}
-            <div>Renamer</div>
+            <a href="{{ route('home') }}" wire:navigate>Renamer</a>
         </x-slot:brand>
 
         {{-- Right side actions --}}
         <x-slot:actions>
-            <x-mary-button label="Messages" icon="o-envelope" link="###" class="btn-ghost btn-sm" responsive />
-            <x-mary-button label="Notifications" icon="o-bell" link="###" class="btn-ghost btn-sm" responsive />
+
+            <x-mary-button label="Open New Directory" icon="o-folder-plus" link="/" class="btn-ghost btn-sm"
+                responsive />
             <x-mary-theme-toggle class="btn btn-circle btn-ghost" />
         </x-slot:actions>
     </x-mary-nav>
@@ -37,8 +39,6 @@
     <main class="h-[calc(100vh-6rem)] overflow-y-hidden">
         {{ $slot }}
     </main>
-
-
 
     <!-- Toast -->
     <x-mary-toast />
