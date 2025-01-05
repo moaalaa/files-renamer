@@ -14,7 +14,7 @@ class Home extends Component
     {
         $directoryPath = Dialog::new()->folders()->open();
 
-        if (! $directoryPath) {
+        if (!$directoryPath) {
             $this->error(
                 title: 'No Directory Selected',
                 position: 'toast-bottom toast-end',
@@ -30,6 +30,7 @@ class Home extends Component
 
         return $this->redirect(route('app', ['path' => str_replace(DIRECTORY_SEPARATOR, '_', $directoryPath)]), navigate: true);
     }
+
     public function render()
     {
         return view('livewire.home');
